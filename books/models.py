@@ -9,7 +9,7 @@ class Publisher(models.Model):
     country = models.CharField(max_length=50)
     website = models.URLField()
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
     class Meta:
@@ -19,19 +19,25 @@ class Author(models.Model):
     salutation = models.CharField(max_length=10)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=40)
-    email = models.EmailField()
-    headshot = models.ImageField(upload_to='/tmp')
+    email = models.EmailField(blank=True, verbose_name='e-mail')
+    headshot = models.ImageField(upload_to='/tmp', blank=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return '%s%s' % (self.first_name, self.last_name)
 
 class Book(models.Model):
     title = models.CharField(max_length=100)
     authors = models.ManyToManyField(Author)
     publisher = models.ForeignKey(Publisher)
-    publication_date = models.DateField()
+    publication_date = models.DateField(blank=True, null=True)
     num_pages = models.IntegerField(blank=True, null=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.title
+    
+    class Admin:
+        list_display = ('title', 'publisher', 'publication_date')
+        list_filter = ('publisher', 'publication_date')
+        ordering = ('-publication_date')
+        search_fields = ('title')
 
