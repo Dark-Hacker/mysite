@@ -1,4 +1,4 @@
-from django.http import  HttpResponseRedirect
+from django.http import  HttpResponseRedirect, HttpResponse 
 from django.shortcuts import get_object_or_404, render 
 from django.core.urlresolvers import reverse
 from django.views import generic
@@ -32,6 +32,15 @@ class ResultsView(generic.DetailView):
     model = Question 
     template_name = 'polls/results.html'
 
+def testview(request):
+    values = request.META.items()
+    values.sort()
+    html = []
+    for k, v in values:
+        html.append('<tr><td>%s</td><td>%s</td></tr>' % (k, v))
+    return HttpResponse('<table>%s</table>' % '\n'.join(html))
+
+#    return HttpResponse("welcome to the page at %s" % request.path)
 
 #def index(request):
  #   latest_question_list = Question.objects.order_by('-pub_date')[:5]
