@@ -1,26 +1,39 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django import forms
+from django.core.mail import send_mail
+from django.http import HttpResponseRedirect
 
+from books.forms import ContactForm 
 from books.models import Book
 
 
-class ContactForm(forms.Form):
-    subject = forms.CharField(max_length=100, label='Subject')
-    email = forms.EmailField(required=True, label='Your email address')
-    message = forms.CharField(widget=forms.Textarea, label='Message')
+def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            send_mail(
+                cd['subjcet'],
+                cd['message'],
+                cd.get('email', 'noreply@example.com'),
+                ['siteowner@example.com'],
+            )
+            return HttpResponseRedirect('/contact/thanks/')
+    else:
+        form = ContactForm(
+            initial={'subject': 'I love you, Leon!', 'fuck':'Please be polite.'}
+            )
+    return render(request, 'contact_form.html', {'form': form})
 
-    def create(self):
-        pass
 
-        
 def search(request):
-    error = False
+    errors = []
     if 'q' in request.GET:
         q = request.GET['q']
         if not q:
-            error = True
+            errors.append('Enter a search term.')
+        elif len(q) > 20:
+            errors.append('Please enter at most 20 characters.')
         else:
             books = Book.objects.filter(title__icontains=q)
             return render(request, 'search_results.html', {'books': books, 'query': q})
-    return render(request, 'search_form.html', {'error': error})
+    return render(request, 'search_form.html', {'errors': errors})
